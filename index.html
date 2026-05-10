@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CountryQuiz</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS Play CDN — no build step needed -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen bg-[#08080f] text-slate-100 font-sans antialiased flex justify-center pt-10 pb-20 px-4">
+
+  <div class="w-full max-w-lg">
+
+    <!-- ── Header ── -->
+    <header class="flex items-center justify-between mb-10">
+      <div class="flex items-center gap-2">
+        <span class="text-xl select-none">🌍</span>
+        <span class="text-lg font-bold tracking-tight">
+          <span class="text-violet-400">Country</span><span class="text-white">Quiz</span>
+        </span>
+      </div>
+      <!-- Score dots + label rendered by JS -->
+      <div id="score-display" class="flex items-center gap-2"></div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main>
+
+      <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+        Errate das Land anhand der Hinweise. Weniger Hinweise = mehr Punkte.
+      </p>
+
+      <!-- Facts revealed one by one -->
+      <ul id="facts-list" class="space-y-3 mb-6"></ul>
+
+      <!-- Input row -->
+      <div class="flex gap-2 mb-3">
+        <div class="autocomplete-wrapper relative flex-1">
+          <input
+            type="text"
+            id="guess-input"
+            placeholder="Land tippen oder auswählen …"
+            autocomplete="off"
+            autofocus
+            class="w-full bg-slate-900 border border-slate-700/60 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          />
+          <ul
+            id="suggestions-list"
+            class="hidden absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl shadow-black/60 overflow-hidden max-h-64 overflow-y-auto"
+          ></ul>
+        </div>
+        <button
+          id="guess-btn"
+          class="shrink-0 px-5 py-3 bg-violet-600 hover:bg-violet-500 active:scale-95 text-white font-semibold text-sm rounded-xl transition-all duration-150 shadow-lg shadow-violet-900/40 disabled:opacity-40 disabled:pointer-events-none"
+        >
+          Tipp abgeben
+        </button>
+      </div>
+
+      <!-- Hint button -->
+      <button
+        id="hint-btn"
+        class="w-full py-3 rounded-xl border border-slate-800 text-slate-500 hover:text-slate-200 hover:border-slate-600 text-sm font-medium transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
+      >
+        Nächsten Hinweis anzeigen
+      </button>
+
+      <!-- Result message — classes swapped by JS on game end -->
+      <div id="result-box" class="hidden mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed"></div>
+
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

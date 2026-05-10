@@ -73,6 +73,9 @@
         </button>
       </div>
 
+      <!-- Insult box — shown on wrong guess -->
+      <div id="insult-box" class="hidden mb-3"></div>
+
       <!-- Hint button -->
       <button
         id="hint-btn"
@@ -81,12 +84,40 @@
         Nächsten Hinweis anzeigen
       </button>
 
+      <!-- Category picker — shown when hint button is clicked -->
+      <div id="category-picker" class="hidden mt-3">
+        <p class="text-xs text-slate-500 mb-3 text-center font-medium tracking-wide">Wähle eine Hinweis-Kategorie:</p>
+        <div id="category-grid" class="grid grid-cols-2 gap-2"></div>
+        <button
+          id="cancel-category-btn"
+          class="mt-2 w-full py-2 text-xs text-slate-600 hover:text-slate-400 transition-colors"
+        >Abbrechen</button>
+      </div>
+
       <!-- Result message — classes swapped by JS on game end -->
       <div id="result-box" class="hidden mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed"></div>
 
     </main>
   </div>
 
+  <!-- Win modal (confetti popup) -->
+  <div id="win-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 win-overlay">
+    <div class="win-card">
+      <div id="win-flags" class="win-flags"></div>
+      <h1 class="win-format-title">5laggen Flaggen</h1>
+      <h2 class="win-greeting">Herzlichen Glückwunsch, Miray! 🎉</h2>
+      <p class="win-label">Das Land des Tages ist</p>
+      <p id="win-country-name" class="win-country"></p>
+      <p id="win-score-text" class="win-score"></p>
+      <p class="win-question">Willst du mehr über dieses Land erfahren?</p>
+      <a id="win-wiki-link" href="#" target="_blank" rel="noopener noreferrer" class="win-btn-primary">
+        Mehr über die Niederlande erfahren →
+      </a>
+      <button id="win-close-btn" class="win-btn-secondary">Nein danke, Ergebnis anzeigen</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

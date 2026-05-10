@@ -1,49 +1,100 @@
-// ─── Game state ───────────────────────────────────────────
+// ─── Game state ───────────────────────────────────────────────
 const state = {
-  currentFactIndex: 0,
-  maxPoints: 3,
+  categoryIndices: {},
+  maxPoints: 0,
   gameOver: false,
 };
 
-// ─── DOM refs ─────────────────────────────────────────────
-const scoreDisplay    = document.getElementById("score-display");
-const factsList       = document.getElementById("facts-list");
-const guessInput      = document.getElementById("guess-input");
-const guessBtn        = document.getElementById("guess-btn");
-const hintBtn         = document.getElementById("hint-btn");
-const resultBox       = document.getElementById("result-box");
-const suggestionsList = document.getElementById("suggestions-list");
+// ─── DOM refs ─────────────────────────────────────────────────
+const scoreDisplay      = document.getElementById("score-display");
+const factsList         = document.getElementById("facts-list");
+const guessInput        = document.getElementById("guess-input");
+const guessBtn          = document.getElementById("guess-btn");
+const hintBtn           = document.getElementById("hint-btn");
+const insultBox         = document.getElementById("insult-box");
+const categoryPicker    = document.getElementById("category-picker");
+const categoryGrid      = document.getElementById("category-grid");
+const cancelCategoryBtn = document.getElementById("cancel-category-btn");
+const resultBox         = document.getElementById("result-box");
+const suggestionsList   = document.getElementById("suggestions-list");
+const winModal          = document.getElementById("win-modal");
+const winFlags          = document.getElementById("win-flags");
+const winCountryName    = document.getElementById("win-country-name");
+const winScoreText      = document.getElementById("win-score-text");
+const winWikiLink       = document.getElementById("win-wiki-link");
+const winCloseBtn       = document.getElementById("win-close-btn");
 
-// ─── Autocomplete state ───────────────────────────────────
+// ─── Autocomplete state ──────────────────────────────────────
 let activeIndex = -1;
 
-// ─── Init ─────────────────────────────────────────────────
+// ─── Insult messages ─────────────────────────────────────────
+const insults = [
+  g => `${g}? Ernsthaft? Bist nicht der Hellste, oder?`,
+  g => `${g}?? Schule – ist dir das ein Begriff?`,
+  g => `Ach, ${g}. Mutig. Falsch, aber mutig.`,
+  g => `${g}? Wow. Einfach... wow. Ich bin sprachlos.`,
+  g => `Ja super Tipp. ${g}. Dein Geographielehrer weint gerade.`,
+  g => `${g}?! Das war dein Tipp – und du stehst dazu?`,
+  g => `Keine Sorge, ${g} ist auch ein schönes Land. Nur leider das falsche.`,
+  g => `${g}. Ich weine innerlich für dich.`,
+  g => `Bist du sicher mit ${g}? Ganz sicher? ... Falsch.`,
+  g => `${g}? Nicht mal annähernd. Wirklich.`,
+  g => `${g}?? Hat Google heute Urlaub oder was?`,
+  g => `${g}. Ich frage mich ernsthaft, was da oben vorgeht.`,
+  g => `Aha, ${g}. Da hat jemand im Unterricht nicht aufgepasst.`,
+  g => `${g}? Das war ein Tipp, keine Aussage über deinen IQ. Oder?`,
+  g => `${g}... Interessante Wahl. Falsch, aber interessant.`,
+  g => `${g}?! Ich hab Pflanzen, die geographisch besser orientiert sind.`,
+  g => `${g}. Tief durchatmen. Nochmal nachdenken. Dann wieder falsch liegen.`,
+  g => `Lass mich raten – du warst in Geographie krank? Immer? Jahrelang?`,
+];
+
+let insultTimeout = null;
+
+// ─── Helpers ─────────────────────────────────────────────────
+function totalHintCount() {
+  return Object.values(quizData.hints).reduce((s, cat) => s + cat.facts.length, 0);
+}
+
+function anyHintsRemain() {
+  return Object.entries(quizData.hints).some(
+    ([key, cat]) => state.categoryIndices[key] < cat.facts.length
+  );
+}
+
+// ─── Init ────────────────────────────────────────────────────
 function init() {
+  Object.keys(quizData.hints).forEach(key => {
+    state.categoryIndices[key] = 0;
+  });
+  state.maxPoints = totalHintCount();
+
   buildScoreDots();
-  revealFact(0);
   setupAutocomplete();
 
   guessBtn.addEventListener("click", handleGuess);
-  hintBtn.addEventListener("click", handleHint);
+  hintBtn.addEventListener("click", openPicker);
+  cancelCategoryBtn.addEventListener("click", closePicker);
+  winCloseBtn.addEventListener("click", closeWinModal);
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // SCORE DISPLAY
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 
 function buildScoreDots() {
-  // Dots — one per fact
   const dotsWrapper = document.createElement("div");
   dotsWrapper.id = "score-dots";
   dotsWrapper.className = "flex items-center gap-1.5";
 
-  for (let i = 0; i < quizData.facts.length; i++) {
+  // One dot per category
+  Object.keys(quizData.hints).forEach(key => {
     const dot = document.createElement("span");
     dot.className = "score-dot";
+    dot.dataset.category = key;
     dotsWrapper.appendChild(dot);
-  }
+  });
 
-  // Point label
   const label = document.createElement("span");
   label.id = "score-label";
   label.className = "text-xs font-semibold text-violet-400 tracking-wide uppercase";
@@ -54,16 +105,19 @@ function buildScoreDots() {
 }
 
 function updateScoreDisplay() {
-  document.querySelectorAll(".score-dot").forEach((dot, i) => {
-    dot.classList.toggle("used", i >= state.maxPoints);
+  // Dot turns grey when all hints in its category are exhausted
+  document.querySelectorAll(".score-dot[data-category]").forEach(dot => {
+    const key = dot.dataset.category;
+    const cat = quizData.hints[key];
+    dot.classList.toggle("used", state.categoryIndices[key] >= cat.facts.length);
   });
   const label = document.getElementById("score-label");
   if (label) label.textContent = `${state.maxPoints} Pkt`;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // AUTOCOMPLETE
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 
 function setupAutocomplete() {
   guessInput.addEventListener("input", onAutocompleteInput);
@@ -78,7 +132,6 @@ function onAutocompleteInput() {
   const query = guessInput.value.trim().toLowerCase();
   if (!query) { hideSuggestions(); return; }
 
-  // "starts with" ranks above "contains"; then alphabetical
   const matches = countries
     .filter(c => c.toLowerCase().includes(query))
     .sort((a, b) => {
@@ -102,13 +155,10 @@ function renderSuggestions(matches, query) {
   matches.forEach(country => {
     const li = document.createElement("li");
     li.innerHTML = highlightMatch(country, query);
-
-    // mousedown fires before blur so the click registers before the list closes
     li.addEventListener("mousedown", (e) => {
       e.preventDefault();
       selectCountry(country);
     });
-
     suggestionsList.appendChild(li);
   });
 
@@ -165,32 +215,101 @@ function highlightActive(items) {
   items.forEach((item, i) => item.classList.toggle("active", i === activeIndex));
 }
 
-// ═══════════════════════════════════════════════════════════
-// GAME LOGIC
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// CATEGORY PICKER
+// ═══════════════════════════════════════════════════════════════
 
-function revealFact(index) {
-  const li    = document.createElement("li");
+function openPicker() {
+  if (state.gameOver) return;
+  hintBtn.classList.add("hidden");
+  categoryPicker.classList.remove("hidden");
+  renderCategoryPicker();
+}
+
+function closePicker() {
+  categoryPicker.classList.add("hidden");
+  hintBtn.classList.remove("hidden");
+}
+
+function renderCategoryPicker() {
+  categoryGrid.innerHTML = "";
+
+  Object.entries(quizData.hints).forEach(([key, cat]) => {
+    const remaining = cat.facts.length - state.categoryIndices[key];
+    const exhausted = remaining === 0;
+
+    const btn = document.createElement("button");
+    btn.className = exhausted ? "category-btn exhausted" : "category-btn";
+    btn.disabled = exhausted;
+    btn.innerHTML = `
+      <span class="cat-icon">${cat.icon}</span>
+      <span class="cat-label">${cat.label}</span>
+      <span class="cat-remaining">${remaining} Hinweis${remaining !== 1 ? "e" : ""} übrig</span>
+    `;
+    btn.addEventListener("click", () => handleCategorySelect(key));
+    categoryGrid.appendChild(btn);
+  });
+}
+
+function handleCategorySelect(key) {
+  const cat = quizData.hints[key];
+  const idx = state.categoryIndices[key];
+
+  if (idx >= cat.facts.length) return;
+
+  revealHint(key, idx);
+  state.categoryIndices[key]++;
+  state.maxPoints = Math.max(1, state.maxPoints - 1);
+  updateScoreDisplay();
+
+  closePicker();
+
+  if (!anyHintsRemain()) {
+    hintBtn.disabled = true;
+  }
+
+  guessInput.value = "";
+  guessInput.focus();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════════════════════════
+
+function revealHint(categoryKey, hintIndex) {
+  const cat = quizData.hints[categoryKey];
+
+  const li = document.createElement("li");
   li.className = "fact-item";
 
   const badge = document.createElement("span");
   badge.className = "fact-badge";
-  badge.textContent = index + 1;
+  badge.textContent = cat.icon;
 
-  const text  = document.createElement("span");
-  text.className = "fact-text";
-  text.textContent = quizData.facts[index];
+  const content = document.createElement("div");
+  content.className = "flex-1 min-w-0";
 
+  const catLabel = document.createElement("span");
+  catLabel.className = "fact-cat-label";
+  catLabel.textContent = cat.label;
+
+  const text = document.createElement("span");
+  text.className = "fact-text block";
+  text.textContent = cat.facts[hintIndex];
+
+  content.appendChild(catLabel);
+  content.appendChild(text);
   li.appendChild(badge);
-  li.appendChild(text);
+  li.appendChild(content);
   factsList.appendChild(li);
 }
 
 function handleGuess() {
   if (state.gameOver) return;
 
-  const guess  = guessInput.value.trim().toLowerCase();
-  const answer = quizData.country.toLowerCase();
+  const rawGuess = guessInput.value.trim();
+  const guess    = rawGuess.toLowerCase();
+  const answer   = quizData.country.toLowerCase();
 
   if (!guess) return;
 
@@ -201,32 +320,23 @@ function handleGuess() {
     return;
   }
 
+  showInsult(rawGuess);
   shakeInput();
-  advanceHint();
-}
 
-function handleHint() {
-  if (state.gameOver) return;
-  advanceHint();
-}
-
-function advanceHint() {
-  const nextIndex = state.currentFactIndex + 1;
-
-  if (nextIndex < quizData.facts.length) {
-    state.currentFactIndex = nextIndex;
-    state.maxPoints = Math.max(1, quizData.facts.length - nextIndex);
-    revealFact(nextIndex);
-    updateScoreDisplay();
-    guessInput.value = "";
-    guessInput.focus();
-
-    if (state.currentFactIndex >= quizData.facts.length - 1) {
-      hintBtn.disabled = true;
-    }
-  } else {
-    endGame(false);
+  // Wrong guess → open category picker if hints remain
+  if (anyHintsRemain() && !hintBtn.disabled) {
+    openPicker();
   }
+}
+
+function showInsult(rawGuess) {
+  const display = rawGuess.charAt(0).toUpperCase() + rawGuess.slice(1);
+  const fn = insults[Math.floor(Math.random() * insults.length)];
+  insultBox.textContent = fn(display);
+  insultBox.classList.remove("hidden");
+
+  clearTimeout(insultTimeout);
+  insultTimeout = setTimeout(() => insultBox.classList.add("hidden"), 5000);
 }
 
 function endGame(won) {
@@ -234,15 +344,58 @@ function endGame(won) {
   guessInput.disabled = true;
   guessBtn.disabled   = true;
   hintBtn.disabled    = true;
+  categoryPicker.classList.add("hidden");
+  insultBox.classList.add("hidden");
+  clearTimeout(insultTimeout);
   hideSuggestions();
 
-  resultBox.className = won
-    ? "mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed result-win"
-    : "mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed result-loss";
+  if (won) {
+    showWinModal();
+  } else {
+    resultBox.className = "mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed result-loss";
+    resultBox.textContent = `😞 Leider falsch. Das gesuchte Land war: ${quizData.country}.`;
+  }
+}
 
-  resultBox.textContent = won
-    ? `🎉 Richtig! Die Antwort war ${quizData.country}. Du hast ${state.maxPoints} Punkt${state.maxPoints !== 1 ? "e" : ""} erreicht!`
-    : `😞 Leider falsch. Das gesuchte Land war: ${quizData.country}.`;
+function showWinModal() {
+  winFlags.textContent = (quizData.flag || "🏳️").repeat(5);
+  winCountryName.textContent = quizData.country;
+  winScoreText.textContent = `Du hast ${state.maxPoints} Punkt${state.maxPoints !== 1 ? "e" : ""} erreicht!`;
+  winWikiLink.href = quizData.wikiPage || `https://de.wikipedia.org/wiki/${encodeURIComponent(quizData.country)}`;
+  winWikiLink.textContent = `Mehr über die ${quizData.country} erfahren →`;
+
+  winModal.classList.remove("hidden");
+  launchConfetti();
+}
+
+function closeWinModal() {
+  winModal.classList.add("hidden");
+  resultBox.className = "mt-5 p-4 rounded-xl text-sm font-medium leading-relaxed result-win";
+  resultBox.textContent = `🎉 Richtig! Die Antwort war ${quizData.country}. Du hast ${state.maxPoints} Punkt${state.maxPoints !== 1 ? "e" : ""} erreicht!`;
+}
+
+function launchConfetti() {
+  // Netherlands flag colors: red, white, blue
+  const colors = ["#ae2029", "#ffffff", "#21468b"];
+  const end = Date.now() + 3500;
+
+  (function frame() {
+    confetti({
+      particleCount: 4,
+      angle: 60,
+      spread: 58,
+      origin: { x: 0, y: 0.6 },
+      colors,
+    });
+    confetti({
+      particleCount: 4,
+      angle: 120,
+      spread: 58,
+      origin: { x: 1, y: 0.6 },
+      colors,
+    });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
 }
 
 function shakeInput() {
@@ -252,5 +405,5 @@ function shakeInput() {
   }, { once: true });
 }
 
-// ─── Start ────────────────────────────────────────────────
+// ─── Start ────────────────────────────────────────────────────
 init();

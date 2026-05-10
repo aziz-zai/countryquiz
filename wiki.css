@@ -1,0 +1,201 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #202122;
+  line-height: 1.65;
+}
+
+/* ── Header ───────────────────────────────────────── */
+#wiki-header {
+  background: #fff;
+  border-bottom: 1px solid #a2a9b1;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.wiki-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #202122;
+  flex-shrink: 0;
+}
+
+.wiki-logo-icon { font-size: 2.1rem; }
+
+.wiki-logo-text {
+  font-family: 'Linux Libertine', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: normal;
+  color: #000;
+}
+
+.wiki-logo-tagline {
+  font-size: 0.68rem;
+  color: #54595d;
+}
+
+.wiki-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wiki-search input {
+  border: 1px solid #a2a9b1;
+  border-radius: 2px;
+  padding: 5px 10px;
+  font-size: 13px;
+  width: 220px;
+  outline: none;
+  color: #54595d;
+}
+
+.wiki-search button {
+  background: #f8f9fa;
+  border: 1px solid #a2a9b1;
+  border-radius: 2px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* ── Content ──────────────────────────────────────── */
+#wiki-body {
+  max-width: 980px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px 32px 48px;
+  min-height: calc(100vh - 52px);
+  border-left: 1px solid #a2a9b1;
+  border-right: 1px solid #a2a9b1;
+}
+
+h1.page-title {
+  font-family: 'Linux Libertine', Georgia, Times, serif;
+  font-size: 2rem;
+  font-weight: normal;
+  border-bottom: 1px solid #a2a9b1;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  color: #000;
+}
+
+h2.section-heading {
+  font-family: 'Linux Libertine', Georgia, Times, serif;
+  font-size: 1.4rem;
+  font-weight: normal;
+  border-bottom: 1px solid #a2a9b1;
+  padding-bottom: 3px;
+  margin: 28px 0 12px;
+}
+
+h3.sub-heading {
+  font-size: 1.05rem;
+  font-weight: bold;
+  margin: 18px 0 8px;
+}
+
+p { margin-bottom: 12px; }
+
+ul, ol {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+li { margin-bottom: 4px; }
+
+/* ── Links ────────────────────────────────────────── */
+a            { color: #3366cc; text-decoration: none; }
+a:hover      { text-decoration: underline; }
+a:visited    { color: #795cb2; }
+
+/* ── Infobox ──────────────────────────────────────── */
+.infobox {
+  float: right;
+  clear: right;
+  margin: 0 0 20px 24px;
+  background: #f8f9fa;
+  border: 1px solid #a2a9b1;
+  font-size: 0.85rem;
+  width: 250px;
+}
+
+.infobox-title {
+  background: #cee0f2;
+  text-align: center;
+  font-weight: bold;
+  padding: 7px 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.infobox-flag {
+  text-align: center;
+  font-size: 3.5rem;
+  padding: 12px;
+  background: #fff;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.infobox table { width: 100%; border-collapse: collapse; }
+
+.infobox td {
+  padding: 5px 9px;
+  vertical-align: top;
+  border-top: 1px solid #eaecf0;
+}
+
+.infobox td:first-child {
+  font-weight: bold;
+  color: #54595d;
+  width: 42%;
+  white-space: nowrap;
+}
+
+/* ── TOC ──────────────────────────────────────────── */
+.toc {
+  background: #f8f9fa;
+  border: 1px solid #a2a9b1;
+  padding: 12px 18px;
+  display: inline-block;
+  margin: 4px 0 20px;
+  font-size: 0.875rem;
+}
+
+.toc-title { font-weight: bold; margin-bottom: 6px; text-align: center; }
+.toc ol    { padding-left: 20px; }
+.toc li    { margin: 3px 0; }
+
+/* ── Highlight box ────────────────────────────────── */
+.wiki-highlight {
+  background: #fef9e7;
+  border: 1px solid #f0c040;
+  border-left: 4px solid #f0c040;
+  padding: 10px 14px;
+  margin: 16px 0;
+  font-size: 0.875rem;
+}
+
+/* ── Footer ───────────────────────────────────────── */
+#wiki-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #a2a9b1;
+  padding: 16px 32px;
+  max-width: 980px;
+  margin: 0 auto;
+  font-size: 0.8rem;
+  color: #54595d;
+}
+
+.clearfix::after { content: ""; display: table; clear: both; }

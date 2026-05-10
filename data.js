@@ -1,14 +1,48 @@
 const quizData = {
-  country: "Japan",
-  facts: [
-    "Dieses Land besteht aus über 6.800 Inseln.",
-    "Die pünktlichsten Züge der Welt fahren hier.",
-    "Die Hauptstadt ist Tokio."
-  ]
+  country: "Niederlande",
+  flag: "🇳🇱",
+  wikiPage: "niederlande.html",
+  hints: {
+    geografisch: {
+      label: "Geografisch",
+      icon: "🌍",
+      facts: [
+        "Große Teile dieses Landes liegen unterhalb des Meerespiegels.",
+        "Es grenzt an Deutschland, Belgien und die Nordsee.",
+        "Die Hauptstadt heißt Amsterdam, aber die Regierung sitzt in Den Haag."
+      ]
+    },
+    promiwelt: {
+      label: "Promiwelt",
+      icon: "⭐",
+      facts: [
+        "Der Maler Rembrandt van Rijn wurde hier geboren.",
+        "Die DJs Tiësto und Martin Garrix kommen aus diesem Land.",
+        "Fußballlegende Johan Cruyff gilt als größter Sportler dieses Landes."
+      ]
+    },
+    meme: {
+      label: "Meme",
+      icon: "😂",
+      facts: [
+        "Dieses Land ist berühmt dafür, dass jeder sein Fahrrad überall hinbringt – auch durch Flüsse.",
+        "Die Menschen hier sind weltweit bekannt für ihre direkte, unverblümte Art.",
+        "Orangefarbene Fankleidung bei Sportevents ist hier ein nationales Erkennungszeichen."
+      ]
+    },
+    kleidung: {
+      label: "Kleidung",
+      icon: "👗",
+      facts: [
+        "Das traditionelle Schuhwerk dieses Landes sind Holzschuhe, genannt Klompen.",
+        "Das blau-weiße Delfter Muster ist ein ikonisches nationales Designsymbol.",
+        "Bei Nationalfeiertagen tragen die Menschen hier traditionell komplett Orange."
+      ]
+    }
+  }
 };
 
 // All sovereign countries in German — used for the autocomplete dropdown.
-// Extend this list when adding new quiz countries so the answer is always findable.
 const countries = [
   "Afghanistan", "Ägypten", "Albanien", "Algerien", "Andorra", "Angola",
   "Antigua und Barbuda", "Äquatorialguinea", "Argentinien", "Armenien",
